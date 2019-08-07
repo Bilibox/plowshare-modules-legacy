@@ -185,7 +185,7 @@ zippyshare_upload() {
     local PAGE SERVER FORM_HTML FORM_ACTION FORM_UID FILE_URL FORM_DATA_AUTH
 
     local SZ=$(get_filesize "$FILE")
-    if [ "$SZ" -gt 523100000 ]; then
+    if [ "$SZ" -gt 524288000 ]; then
         log_debug 'file is bigger than 500MB'
         return $ERR_SIZE_LIMIT_EXCEEDED
     fi
