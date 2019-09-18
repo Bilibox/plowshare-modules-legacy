@@ -227,7 +227,7 @@ zippyshare_upload() {
     PAGE=$(curl_with_log -F "uploadId=$FORM_UID" \
         "$FORM_DATA_AUTH" \
         -F "Filedata=@$FILE;filename=$DESTFILE" \
-		--form-string 'x=51' --form-string 'y=20' "$FORM_DATA_PRIV" \
+		--form-string 'x=51' --form-string 'y=20' $FORM_DATA_PRIV \
         "$FORM_ACTION") || return
 
     # Take first occurrence
