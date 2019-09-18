@@ -45,7 +45,7 @@ zippyshare_login() {
     local -r BASE_URL=$3
     local LOGIN_DATA PAGE NAME
 
-    LOGIN_DATA='login=$USER&pass=$PASSWORD'
+    LOGIN_DATA="login=$USER&pass=$PASSWORD"
     PAGE=$(post_login "$AUTH" "$COOKIE_FILE" "$LOGIN_DATA" \
         "$BASE_URL/services/login" -b 'ziplocale=en') || return
 
@@ -225,7 +225,7 @@ zippyshare_upload() {
 
     # Important: field order seems checked! zipname/ziphash go before Filedata!
     PAGE=$(curl_with_log -F "uploadId=$FORM_UID" \
-        "$FORM_DATA_AUTH" \
+        $FORM_DATA_AUTH \
         -F "Filedata=@$FILE;filename=$DESTFILE" \
 		--form-string 'x=51' --form-string 'y=20' $FORM_DATA_PRIV \
         "$FORM_ACTION") || return
