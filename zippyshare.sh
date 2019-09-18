@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Plowshare zippyshare.com module
 # Copyright (c) 2012-2015 Plowshare team
 #
@@ -42,12 +44,12 @@ zippyshare_login() {
     local -r BASE_URL=$3
     local LOGIN_DATA PAGE NAME
 
-    LOGIN_DATA='login=$USER&pass=$PASSWORD'
+    LOGIN_DATA="login=$USER&pass=$PASSWORD"
     PAGE=$(post_login "$AUTH" "$COOKIE_FILE" "$LOGIN_DATA" \
         "$BASE_URL/services/login" -b 'ziplocale=en') || return
 
     if [ -n "$PAGE" ]; then
-        log_debug "$FUNCNAME: non empty result. Site updated?"
+        log_debug "${FUNCNAME[0]}: non empty result. Site updated?"
     fi
 
     # If successful, 5 entries are added into cookie file:
@@ -57,7 +59,7 @@ zippyshare_login() {
         return 0
     fi
 
-    return $ERR_LOGIN_FAILED
+    return "$ERR_LOGIN_FAILED"
 }
 
 # Output a zippyshare file download URL
@@ -75,7 +77,7 @@ zippyshare_download() {
     # File does not exist on this server
     # File has expired and does not exist anymore on this server
     if match 'File does not exist\|File has expired\|HTTP Status 404' "$PAGE"; then
-        return $ERR_LINK_DEAD
+        return "$ERR_LINK_DEAD"
     fi
 
     detect_javascript || return
@@ -96,7 +98,7 @@ zippyshare_download() {
         local PUBKEY WCI CHALLENGE WORD ID
         PUBKEY='6LeIaL0SAAAAAMnofB1i7QAJta9G7uCipEPcp89r'
         WCI=$(recaptcha_process $PUBKEY) || return
-        { read WORD; read CHALLENGE; read ID; } <<< "$WCI"
+        { read -r WORD; read -r CHALLENGE; read -r ID; } <<< "$WCI"
 
         PAGE=$(curl -b "$COOKIE_FILE" --referer "$URL" \
             -H 'X-Requested-With: XMLHttpRequest' \
@@ -107,12 +109,12 @@ zippyshare_download() {
 
         # Returns "true" or "false"
         if [ "$PAGE" != 'true' ]; then
-            captcha_nack $ID
+            captcha_nack "$ID"
             log_debug 'reCaptcha error'
-            return $ERR_CAPTCHA
+            return "$ERR_CAPTCHA"
         fi
 
-        captcha_ack $ID
+        captcha_ack "$ID"
         log_debug 'correct captcha'
 
         echo "$BASE_URL$PART2"
@@ -138,7 +140,7 @@ zippyshare_download() {
             ;;
         *)
             log_error "Unexpected content ('$CONTENT'), site updated?"
-            return $ERR_FATAL
+            return "$ERR_FATAL"
     esac
 
     JS=$(sed -n '/id="dlbutton"/,${
@@ -187,7 +189,7 @@ zippyshare_upload() {
     local SZ=$(get_filesize "$FILE")
     if [ "$SZ" -gt 524288000 ]; then
         log_debug 'file is bigger than 500MB'
-        return $ERR_SIZE_LIMIT_EXCEEDED
+        return "$ERR_SIZE_LIMIT_EXCEEDED"
     fi
 
     if [ -n "$AUTH" ]; then
@@ -212,7 +214,7 @@ zippyshare_upload() {
 
     # Important: field order seems checked! zipname/ziphash go before Filedata!
     PAGE=$(curl_with_log -F "uploadId=$FORM_UID" \
-        $FORM_DATA_AUTH \
+        "$FORM_DATA_AUTH" \
         -F "Filedata=@$FILE;filename=$DESTFILE" \
         "$FORM_ACTION") || return
 
@@ -282,7 +284,7 @@ zippyshare_list_rec() {
         LINKS=$(echo "$JSON" | parse_json 'ident' split) || return
         NAMES=$(echo "$JSON" | parse_json 'data' split) || return
 
-        while read LINE; do
+        while read -r LINE; do
             test "$LINE" || continue
             URL="$BASE_URL/$USER/$LINE/dir.html"
             if [ "$LINE" != "$IDENT" ]; then
@@ -310,7 +312,7 @@ zippyshare_probe() {
     # File does not exist on this server
     # File has expired and does not exist anymore on this server
     if match 'File does not exist\|File has expired\|HTTP Status 404' "$PAGE"; then
-        return $ERR_LINK_DEAD
+        return "$ERR_LINK_DEAD"
     fi
 
     REQ_OUT=c
