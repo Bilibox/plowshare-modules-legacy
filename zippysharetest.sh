@@ -26,8 +26,7 @@ MODULE_ZIPPYSHARE_DOWNLOAD_FINAL_LINK_NEEDS_COOKIE=yes
 MODULE_ZIPPYSHARE_DOWNLOAD_SUCCESSIVE_INTERVAL=
 
 MODULE_ZIPPYSHARE_UPLOAD_OPTIONS="
-AUTH,a,auth,a=USER:PASSWORD,User account
-PRIVATE_FILE,,private,,Do not allow others to download the file"
+AUTH,a,auth,a=USER:PASSWORD,User account"
 MODULE_ZIPPYSHARE_UPLOAD_REMOTE_SUPPORT=no
 
 MODULE_ZIPPYSHARE_LIST_OPTIONS=""
@@ -45,7 +44,7 @@ zippyshare_login() {
     local -r BASE_URL=$3
     local LOGIN_DATA PAGE NAME
 
-    LOGIN_DATA="login=$USER&pass=$PASSWORD"
+    LOGIN_DATA='login=$USER&pass=$PASSWORD'
     PAGE=$(post_login "$AUTH" "$COOKIE_FILE" "$LOGIN_DATA" \
         "$BASE_URL/services/login" -b 'ziplocale=en') || return
 
@@ -185,7 +184,7 @@ zippyshare_upload() {
     local -r FILE=$2
     local -r DESTFILE=$3
     local -r BASE_URL='http://www.zippyshare.com'
-    local PAGE SERVER FORM_HTML FORM_ACTION FORM_UID FILE_URL FORM_DATA_AUTH FORM_DATA_PRIV
+    local PAGE SERVER FORM_HTML FORM_ACTION FORM_UID FILE_URL FORM_DATA_AUTH
 
     local SZ=$(get_filesize "$FILE")
     if [ "$SZ" -gt 524288000 ]; then
@@ -206,11 +205,6 @@ zippyshare_upload() {
     FORM_ACTION=$(echo "$FORM_HTML" | parse_form_action) || return
     FORM_UID=$(echo "$FORM_HTML" | parse_form_input_by_name 'uploadId') || return
 
-    if [ -n "$PRIVATE_FILE" ]; then 
-		FORM_DATA_PRIV='--form-string private=checkbox'	
-        log_debug 'set as private file (as requested)'
-	fi
-
     if [ -n "$AUTH" ]; then
         local NAME HASH
         NAME=$(parse_cookie 'zipname' < "$COOKIE_FILE")
@@ -222,7 +216,6 @@ zippyshare_upload() {
     PAGE=$(curl_with_log -F "uploadId=$FORM_UID" \
         "$FORM_DATA_AUTH" \
         -F "Filedata=@$FILE;filename=$DESTFILE" \
-		--form-string 'x=51' --form-string 'y=20' "$FORM_DATA_PRIV" \
         "$FORM_ACTION") || return
 
     # Take first occurrence
