@@ -45,7 +45,7 @@ zippyshare_login() {
     local -r BASE_URL=$3
     local LOGIN_DATA PAGE NAME
 
-    LOGIN_DATA="login=$USER&pass=$PASSWORD"
+    LOGIN_DATA='login=$USER&pass=$PASSWORD'
     PAGE=$(post_login "$AUTH" "$COOKIE_FILE" "$LOGIN_DATA" \
         "$BASE_URL/services/login" -b 'ziplocale=en') || return
 
